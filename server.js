@@ -6,6 +6,8 @@ const cookieParser = require("cookie-parser");
 const cors = require("cors");
 require("dotenv").config();
 const route = require("./routes/route");
+const swaggerUI = require("swagger-ui-express");
+const swaggerJsDoc = require("swagger-jsdoc");
 //app
 const app = express();
 
@@ -31,7 +33,11 @@ app.use(cookieParser());
 if (process.env.NODE_ENV === "development") {
   app.use(cors({ origin: `${process.env.CLIENT_URL}` }));
 }
+//swagger
+const options = require("./config/swagger");
 
+const specs = swaggerJsDoc(options);
+app.use("/api-docs", swaggerUI.serve, swaggerUI.setup(specs));
 //route
 app.get("/healthcheck", (req, res) => {
   res.send({
