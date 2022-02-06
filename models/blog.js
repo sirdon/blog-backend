@@ -42,7 +42,7 @@ const blogSchema = new mongoose.Schema(
       required: true,
     },
   },
-  { timestamp: true }
+  { timestamps: true }
 );
 blogSchema.plugin(dbErrorHandler);
 module.exports = mongoose.model("Blog", blogSchema);
