@@ -8,6 +8,16 @@ require("dotenv").config();
 const route = require("./routes/route");
 const swaggerUI = require("swagger-ui-express");
 const swaggerJsDoc = require("swagger-jsdoc");
+const Sentry = require("@sentry/node");
+const Tracing = require("@sentry/tracing");
+Sentry.init({
+  dsn: "https://cace1119f7784674a5a3dd72610f5d63@o1207583.ingest.sentry.io/6341196",
+  tracesSampleRate: 1.0,
+});
+const transaction = Sentry.startTransaction({
+  op: "test",
+  name: "My First Test Transaction",
+});
 //app
 const app = express();
 
@@ -36,10 +46,21 @@ if (process.env.NODE_ENV === "development") {
 //swagger
 const options = require("./config/swagger");
 
+const foo = (req, res) => {
+  try {
+    throw new Error("sentry test")
+  } catch (error) {
+    console.log(error)
+    Sentry.captureException(error);
+  } finally {
+    transaction.finish()
+  }
+}
 const specs = swaggerJsDoc(options);
 app.use("/api-docs", swaggerUI.serve, swaggerUI.setup(specs));
 //route
 app.get("/healthcheck", (req, res) => {
+  foo(req, res);
   res.send({
     timestamp: new Date().getTime(),
     success: true,
